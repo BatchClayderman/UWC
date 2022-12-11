@@ -47,14 +47,14 @@ environment_checksum = {										\
 	"python-docx":"import docx", 									\
 	"pdfminer":"\n".join(["from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager", 		\
 		"from pdfminer.converter import PDFPageAggregator", 					\
-		"from pdfminer.layout import LAParams", 							\
+		"from pdfminer.layout import LAParams", 						\
 		"from pdfminer.pdfparser import PDFParser", 						\
 		"from pdfminer.pdfdocument import PDFDocument", 					\
 		"from pdfminer.pdfpage import PDFPage"							\
 	]), 											\
 												\
 	"numpy":"from numpy import nan, nansum, nanmean, nanstd, array", 					\
-	"pandas":"from pandas import DataFrame as DF", 							\
+	"pandas":"from pandas import DataFrame as DF, read_excel", 						\
 	"matplotlib":"from matplotlib import ticker, pyplot as plt, use", 						\
 	"wordcloud":"from wordcloud import WordCloud", 							\
 	"chinesecalendar":"from chinese_calendar import is_holiday"						\
@@ -63,7 +63,7 @@ environment_state = {							\
 	"<built-in>":1, "jieba":0, "snownlp":0, "python-docx":0, "pdfminer":0, 		\
 	"numpy":0, "pandas":0, "matplotlib":0, "wordcloud":0, "chinesecalendar":0		\
 }
-environment_global = "jieba, SnowNLP, sentiment, WordCloud, docx, PDFPageInterpreter, PDFResourceManager, PDFPageAggregator, LAParams, PDFParser, PDFDocument, PDFPage, nan, nansum, nanmean, nanstd, array, DF, ticker, plt, use, is_holiday"
+environment_global = "jieba, SnowNLP, sentiment, WordCloud, docx, PDFPageInterpreter, PDFResourceManager, PDFPageAggregator, LAParams, PDFParser, PDFDocument, PDFPage, nan, nansum, nanmean, nanstd, array, DF, read_excel, ticker, plt, use, is_holiday"
 class Environment_State:
 	environment_satisfy_lock = Lock()
 	environment_satisfy = False
@@ -583,8 +583,24 @@ def getPdf(filepath):#获取 .pdf 文本内容
 	fp.close()
 	return content
 
+def getExcel(filepath, index_columns = None):#获取 excel 文件内容
+	try:
+		pf = read_excel(filepath)
+	except:
+		return None
+	if index_columns is None:
+		cols = [list(pf.columns)[0]]
+	elif type(index_columns) in (tuple, list, set):
+		cols = index_columns
+	else:
+		cols = [index_columns]
+	content = ""
+	for col in cols:
+		content += "\n".join([str(item) for item in pf[col].tolist()])
+	return content
+
 def getContent(filepath):#获取文件文本内容
-	support_dicts = {".txt":getTxt, ".docx":getDocx, ".pdf":getPdf}
+	support_dicts = {".txt":getTxt, ".csv":getTxt, ".docx":getDocx, ".pdf":getPdf, ".xlsx":getExcel, ".xls":getExcel, ".xlsm":getExcel}
 	extension = os.path.splitext(filepath.lower())[1].lower()
 	if extension in support_dicts:
 		try:
