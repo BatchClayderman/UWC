@@ -1709,9 +1709,9 @@ def main():
 	thread_splitter = Thread(target = splitter_main, args = ())
 	thread_similarity = Thread(target = similarity_main, args = ())
 	thread_sentiment = Thread(target = sentiment_main, args = ())
-	thread_splitter.setDaemon(True)
-	thread_similarity.setDaemon(True)
-	thread_sentiment.setDaemon(True)
+	thread_splitter.daemon = True
+	thread_similarity.daemon = True
+	thread_sentiment.daemon = True
 	thread_splitter.start()
 	thread_similarity.start()
 	thread_sentiment.start()
